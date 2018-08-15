@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<link rel="stylesheet" href="./bootstrap-3.3.7-dist/css/bootstrap.css">
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+	<style>
+		@media (max-width: 640px )  {
+			#app {
+				width : 320px;
+				margin : 50px auto;
+			}
+		}
+		@media (min-width: 990px) {
+			#app {
+				width : 800px;
+				margin : 100px auto;
+			}
+		}
+		@media (min-width:640px) and (max-width:990px) {
+			#app {
+				margin : 100px 150px 0 150px;
+			}
+		}
+		.header {
+			text-align : center;
+			font-size : 18px;
+			font-weight : bold;
+		}
+		.worker .title {
+			font-size : 18px;
+		}
+		.worker ul li:nth-of-type(1):hover {
+			background : none;
+		}
+		.worker ul {
+			padding-left : 0;
+			margin-top:20px;
+		}
+		.worker ul li:hover {
+			background : #eee;
+			cursor : pointer;
+		}
+		.worker ul li .num{
+			display : inline-block;
+			width : 20px;
+			height : 20px;
+			background : #00FFEA;
+			line-height:20px;
+			text-align : center;
+			margin-right : 10px;
+		}
+		.color-white {
+			display : inline-block;
+			width : 30px;
+			height : 20px;
+			background : gray;
+			color : #fff;
+			text-align : center;
+			line-height : 20px;
+			border-radius : 10px;
+			margin : 0 5px;
+		}
+		.finish {
+			color : lime;
+		}
+		.icon {
+			display : inline-block;
+			float : right;
+		}
+	</style>
+</head>
+<body>
+	<div id="app">
+		<div class="header">添加工作事项</div>
+		<div class="input-group-lg">
+				<span id="basic-addon1"></span>
+				<input type="text" class="form-control" placeholder="输入清单" aria-describedby="basic-addon1" @keyup.enter="addItem" v-model="val">
+		</div>
+		<div class="worker">
+			<ul>
+				<li class="list-group-item"><div class="title">工作清单:</div></li>
+				<li v-for="(item,index) in Items" v-if="!item.isFinish" class="list-group-item">
+						<span class="num">{{index + 1}}</span>	
+						<span>{{item.title}}</span>
+						<div class="icon">
+								<span :class="item.isFinish ? 'finish' : 'normal'" @click="change(item)" class="glyphicon glyphicon-ok color-white"></span>
+								<span @click="del(index)"  class="glyphicon glyphicon-remove color-white"></span>
+						</div>
+						
+				</li>
+			</ul>
+			<ul>
+				<li class="list-group-item"><div class="title">已完成:</div></li>
+				<li v-for="(item,index) in Items" v-if="item.isFinish" class="list-group-item">
+						<span class="num">{{index + 1}}</span>	
+						<span>{{item.title}}</span>	
+						<div class="icon">
+								<span :class="item.isFinish ? 'finish' : 'normal'" @click="change(item)" class="color-white glyphicon glyphicon-ok"></span>
+								<span @click="del(index)" class="glyphicon glyphicon-remove color-white"></span>
+						</div>					
+				</li>
+			</ul>
+		</div>
+	</div>
+	<script>
+		const control = (function () {
+			return {
+				addItem(todoLists) {//将清单列表添加到localStorage当中
+					localStorage.setItem('todoLists',JSON.stringify(todoLists))
+				},
+				getItem() { // 取出localStorage当中的toDoLists在页面中进行渲染
+					return JSON.parse(localStorage.getItem('todoLists'));
+				}
+			}
+		})()
+		var vm = new Vue({
+			el : '#app',
+			data : {
+				val : '',
+				Items : control.getItem() || [] //
+			},
+			methods : {
+				// 在输入框输入清单项回车，执行addItem将清单项放到data字段中Items数据中
+				// 然后调用control的addItem方法，将清单项添加到toDoLists中并将toDoLists存到localStorage当中。
+				addItem(e) {
+					var item = {
+						title : this.val,
+						isFinish : false
+					}
+					this.Items.push(item) ;
+					control.addItem(this.Items);
+					this.val='';
+				},
+				// 从localStorage当中取出toDoLists列表
+				getItem() {
+					return control.getItem();
+				},
+				// 点击某个清单项的√，将此项的状态改为与当前状态相反，再将修改好的toDoLists存到localStorage
+				change(item) {
+					item.isFinish = !item.isFinish;
+					control.addItem(this.Items);
+				},
+				// 点击某个清单项的×,将此清单删除，将删除后的toDoLists再存到localStorage
+				del(index) {
+					this.Items.splice(index,1);
+					control.addItem(this.Items);
+				}
+			}
+		})
+		
+	</script>
+</body>
+</html>
